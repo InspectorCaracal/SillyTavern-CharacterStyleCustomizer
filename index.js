@@ -78,6 +78,12 @@ let mainStyleElement;
 let previewStyleElement;
 let globalCssElement;
 
+// it'll be better later
+const DEBUG = false;
+function debug() {
+    if (DEBUG) console.log(arguments);
+}
+
 // Initialize the extension settings
 function initializeSettings() {
     if (!extension_settings[settingsKey]) {
@@ -208,18 +214,18 @@ function getCurrentPersona() {
 
         if (avatarElement) {
             avatarId = avatarElement.getAttribute('data-avatar-id') || '';
-            console.log(`[CSC] Found user avatar: ${avatarId}`);
+            debug(`[CSC] Found user avatar: ${avatarId}`);
         } else {
             avatarId = power_user.user_avatar;
-            console.log(`[CSC] Using fallback user avatar: ${avatarId}`);
+            debug(`[CSC] Using fallback user avatar: ${avatarId}`);
         }
 
         if (nameElement) {
             userName = nameElement.textContent.trim();
-            console.log(`[CSC] Found user name: ${userName}`);
+            debug(`[CSC] Found user name: ${userName}`);
         } else {
             userName = power_user.personas[power_user.user_avatar] || 'User';
-            console.log(`[CSC] Using fallback user name: ${userName}`);
+            debug(`[CSC] Using fallback user name: ${userName}`);
         }
     } catch (error) {
         console.error('[CSC] Error getting persona:', error);
@@ -228,7 +234,7 @@ function getCurrentPersona() {
     }
 
     const personaId = `${CharacterType.PERSONA}|${userName}|${avatarId}`;
-    console.log(`[CSC] Current persona ID: ${personaId}`);
+    debug(`[CSC] Current persona ID: ${personaId}`);
 
     return {
         id: personaId,
@@ -353,7 +359,7 @@ function convertToHexColor(color) {
 function createSimpleColorPicker(initialColor, onChange, id) {
     // Ensure initial color is in hex format
     const hexColor = initialColor ? convertToHexColor(initialColor) : '';
-    console.log(`[CSC] Creating color picker ${id} with initial color: "${initialColor}" -> "${hexColor}"`);
+    debug(`[CSC] Creating color picker ${id} with initial color: "${initialColor}" -> "${hexColor}"`);
 
     // Create container
     const container = document.createElement('div');
@@ -405,7 +411,7 @@ function createSimpleColorPicker(initialColor, onChange, id) {
     // Add event listeners
     hiddenInput.addEventListener('input', (e) => {
         const newColor = e.target.value.toUpperCase();
-        console.log(`[CSC] Hidden input changed for ${id}: "${newColor}"`);
+        debug(`[CSC] Hidden input changed for ${id}: "${newColor}"`);
         colorPreview.style.backgroundColor = newColor;
         textInput.value = newColor;
         colorPreview.classList.remove('empty-color');
@@ -428,7 +434,7 @@ function createSimpleColorPicker(initialColor, onChange, id) {
 
     textInput.addEventListener('input', (e) => {
         let newColor = e.target.value;
-        console.log(`[CSC] Text input changed for ${id}: "${newColor}"`);
+        debug(`[CSC] Text input changed for ${id}: "${newColor}"`);
 
         // If input is empty, treat as "no color"
         if (!newColor) {
@@ -759,7 +765,7 @@ function showConfirmationDialog(title, message, onConfirm) {
 function setupImportExportHelpers() {
     // Any common import/export initialization code can go here
     // This is kept as a placeholder in case we need to add any global helpers later
-    console.log('[CSC] Import/Export feature initialized in character cards only');
+    debug('[CSC] Import/Export feature initialized in character cards only');
 }
 
 // Create the settings UI
@@ -1010,7 +1016,7 @@ function setupGlobalMainColorPickers() {
             mainColors[config.key],
             (color) => {
                 settings.globalSettings.mainColors[config.key] = color;
-                console.log(`[CSC] Global main color ${config.key} changed to ${color}`);
+                debug(`[CSC] Global main color ${config.key} changed to ${color}`);
 
                 // Immediately update main style
                 updateMainStyle();
@@ -1062,7 +1068,7 @@ function setupUserMainColorPickers() {
             userColors[config.key],
             (color) => {
                 settings.userSettings.mainColors[config.key] = color;
-                console.log(`[CSC] User main color ${config.key} changed to ${color}`);
+                debug(`[CSC] User main color ${config.key} changed to ${color}`);
 
                 // Immediately update main style
                 updateMainStyle();
@@ -1141,7 +1147,7 @@ function setupColorMappingSelects() {
         // Add change handler
         select.addEventListener('change', () => {
             settings.globalSettings.colorMapping[config.key] = select.value;
-            console.log(`[CSC] Color mapping for ${config.key} changed to ${select.value}`);
+            debug(`[CSC] Color mapping for ${config.key} changed to ${select.value}`);
 
             // Immediately update main style
             updateMainStyle();
@@ -1844,7 +1850,7 @@ function updateCardSaveHandler() {
             return;
         }
 
-        console.log(`[CSC] Saving card styles for character: ${charInfo.id}`);
+        debug(`[CSC] Saving card styles for character: ${charInfo.id}`);
 
         // Initialize character settings if needed
         if (!settings.characterSettings[charInfo.id]) {
@@ -1862,10 +1868,10 @@ function updateCardSaveHandler() {
             const input = document.getElementById(`card-color-${config.key}-text`);
             if (input) {
                 if (input.value) {
-                    console.log(`[CSC] Setting ${config.key} color to: ${input.value}`);
+                    debug(`[CSC] Setting ${config.key} color to: ${input.value}`);
                     settings.characterSettings[charInfo.id].mainColors[config.key] = input.value;
                 } else {
-                    console.log(`[CSC] Removing ${config.key} color`);
+                    debug(`[CSC] Removing ${config.key} color`);
                     delete settings.characterSettings[charInfo.id].mainColors[config.key];
                 }
             }
@@ -1876,10 +1882,10 @@ function updateCardSaveHandler() {
             const input = document.getElementById(`char-specific-${config.key}-text`);
             if (input) {
                 if (input.value) {
-                    console.log(`[CSC] Setting specific ${config.key} color to: ${input.value}`);
+                    debug(`[CSC] Setting specific ${config.key} color to: ${input.value}`);
                     settings.characterSettings[charInfo.id].specificColors[config.key] = input.value;
                 } else {
-                    console.log(`[CSC] Removing specific ${config.key} color`);
+                    debug(`[CSC] Removing specific ${config.key} color`);
                     delete settings.characterSettings[charInfo.id].specificColors[config.key];
                 }
             }
@@ -1888,21 +1894,21 @@ function updateCardSaveHandler() {
         // Get message CSS
         const customCssField = document.getElementById('card-custom-css');
         if (customCssField) {
-            console.log(`[CSC] Setting custom CSS of length: ${customCssField.value.length}`);
+            debug(`[CSC] Setting custom CSS of length: ${customCssField.value.length}`);
             settings.characterSettings[charInfo.id].customCSS = customCssField.value || '';
         }
 
         // Get global CSS
         const globalCssField = document.getElementById('card-global-css');
         if (globalCssField) {
-            console.log(`[CSC] Setting global CSS of length: ${globalCssField.value.length}`);
+            debug(`[CSC] Setting global CSS of length: ${globalCssField.value.length}`);
             settings.characterSettings[charInfo.id].globalCSS = globalCssField.value || '';
         }
 
         // Get global CSS toggle state
         const enableGlobalCssCheckbox = document.getElementById('card-enable-global-css');
         if (enableGlobalCssCheckbox) {
-            console.log(`[CSC] Setting global CSS enabled: ${enableGlobalCssCheckbox.checked}`);
+            debug(`[CSC] Setting global CSS enabled: ${enableGlobalCssCheckbox.checked}`);
             settings.characterSettings[charInfo.id].enableGlobalCSS = enableGlobalCssCheckbox.checked;
         }
 
@@ -1911,7 +1917,7 @@ function updateCardSaveHandler() {
 
         // Apply Global CSS after saving if needed
         if (settings.enableGlobalCSS && settings.characterSettings[charInfo.id].enableGlobalCSS !== false) {
-            console.log(`[CSC] Applying global CSS for character: ${charInfo.id}`);
+            debug(`[CSC] Applying global CSS for character: ${charInfo.id}`);
             applyGlobalCSS(charInfo.id);
         }
 
@@ -1943,8 +1949,8 @@ function setupCharacterCardColorPickers() {
     }
 
     if (charInfo.id && settings.characterSettings[charInfo.id]) {
-        console.log("[CSC] Character main colors:", settings.characterSettings[charInfo.id].mainColors);
-        console.log("[CSC] Character specific colors:", settings.characterSettings[charInfo.id].specificColors);
+        debug("[CSC] Character main colors:", settings.characterSettings[charInfo.id].mainColors);
+        debug("[CSC] Character specific colors:", settings.characterSettings[charInfo.id].specificColors);
     }
 
     // Set CSS fields if they exist
@@ -2821,14 +2827,14 @@ function setupPersonaChangeTracking() {
         // Emit our custom event
         const currentPersona = getCurrentPersona();
         if (currentPersona) {
-            console.log('[CSC] Persona change detected:', currentPersona);
+            debug('[CSC] Persona change detected:', currentPersona);
             exp_event_source.emit(exp_event_type.PERSONA_CHANGED, currentPersona);
         }
     };
 
     // Listen for persona changes
     exp_event_source.on(exp_event_type.PERSONA_CHANGED, (persona) => {
-        console.log("[CSC] Handling persona change:", persona);
+        debug("[CSC] Handling persona change:", persona);
 
         // Ensure UI updates
         setTimeout(() => {
@@ -2890,7 +2896,7 @@ function setupPersonaChangeTracking() {
         const personaKey = `${currentPersona.name}|${currentPersona.avatar}`;
 
         if (window._lastPersonaKey && window._lastPersonaKey !== personaKey) {
-            console.log('[CSC] Persona change detected by interval check');
+            debug('[CSC] Persona change detected by interval check');
             exp_event_source.emit(exp_event_type.PERSONA_CHANGED, currentPersona);
         }
 
@@ -3572,11 +3578,11 @@ function generateGlobalCSS() {
 
 // Apply global CSS for active character with enhanced logging
 function applyGlobalCSS(characterId) {
-    console.log(`[CSC] Applying global CSS for ${characterId}`);
-    console.log(`[CSC] Settings enabled: ${settings.enabled}, Global CSS enabled: ${settings.enableGlobalCSS}`);
+    debug(`[CSC] Applying global CSS for ${characterId}`);
+    debug(`[CSC] Settings enabled: ${settings.enabled}, Global CSS enabled: ${settings.enableGlobalCSS}`);
 
     if (!settings.enabled || !settings.enableGlobalCSS || !globalCssElement) {
-        console.log('[CSC] Skipping global CSS application due to settings');
+        debug('[CSC] Skipping global CSS application due to settings');
         return;
     }
 
@@ -3586,19 +3592,19 @@ function applyGlobalCSS(characterId) {
     // Remove all existing character-specific global CSS classes
     const oldClasses = document.body.className.match(/\bcsc-global-css-[^\s]+/g);
     if (oldClasses) {
-        console.log('[CSC] Removing old global CSS classes:', oldClasses);
+        debug('[CSC] Removing old global CSS classes:', oldClasses);
     }
     document.body.className = document.body.className.replace(/\bcsc-global-css-[^\s]+/g, '');
 
     // If no character is selected, or character has no settings, return
     if (!characterId || !settings.characterSettings[characterId]) {
-        console.log(`[CSC] No settings found for character ${characterId}`);
+        debug(`[CSC] No settings found for character ${characterId}`);
         return;
     }
 
     // Check if global CSS is enabled for this character
     if (settings.characterSettings[characterId].enableGlobalCSS === false) {
-        console.log(`[CSC] Global CSS disabled for character ${characterId}`);
+        debug(`[CSC] Global CSS disabled for character ${characterId}`);
         return;
     }
 
@@ -3607,26 +3613,26 @@ function applyGlobalCSS(characterId) {
 
     // If no global CSS, return
     if (!globalCSS) {
-        console.log(`[CSC] No global CSS defined for character ${characterId}`);
+        debug(`[CSC] No global CSS defined for character ${characterId}`);
         return;
     }
 
     // Generate a character-specific class name for the body
     const safeCharId = characterId.replace(/[|]/g, '-').replace(/\./g, '_');
     const className = `csc-global-css-${safeCharId}`;
-    console.log(`[CSC] Adding global CSS class to body: ${className}`);
+    debug(`[CSC] Adding global CSS class to body: ${className}`);
 
     // Apply the class to body
     document.body.classList.add(className);
 
     // Apply the global CSS
     globalCssElement.textContent = `/* Global CSS for ${characterId} */\n${globalCSS}`;
-    console.log(`[CSC] Applied global CSS for ${characterId}`);
+    debug(`[CSC] Applied global CSS for ${characterId}`);
 }
 
 // Clear global CSS
 function clearGlobalCSS() {
-    console.log('[CSC] Clearing global CSS');
+    debug('[CSC] Clearing global CSS');
     if (globalCssElement) {
         globalCssElement.textContent = '';
     }
@@ -3642,7 +3648,7 @@ function updatePreviewStyle(characterId) {
         return;
     }
 
-    console.log(`[CSC] Updating preview style for character: ${characterId}`);
+    debug(`[CSC] Updating preview style for character: ${characterId}`);
 
     // Get current character settings from UI (not yet saved)
     const charConfig = {
@@ -3736,15 +3742,15 @@ function clearPreviewStyle() {
 
 // Update main style with enhanced logging
 function updateMainStyle() {
-    console.log('[CSC] Updating main style');
+    debug('[CSC] Updating main style');
 
     if (!mainStyleElement) {
-        console.log('[CSC] Main style element not found');
+        debug('[CSC] Main style element not found');
         return;
     }
 
     if (!settings.enabled) {
-        console.log('[CSC] Extension disabled, clearing styles');
+        debug('[CSC] Extension disabled, clearing styles');
         mainStyleElement.textContent = '';
         clearGlobalCSS();
         return;
@@ -3766,12 +3772,12 @@ function updateMainStyle() {
 
     // Apply global CSS for currently selected character
     const currentChar = getCurrentCharacter();
-    console.log('[CSC] Current character for global CSS:', currentChar);
+    debug('[CSC] Current character for global CSS:', currentChar);
 
     if (currentChar) {
         applyGlobalCSS(currentChar.id);
     } else {
-        console.log('[CSC] No current character, clearing global CSS');
+        debug('[CSC] No current character, clearing global CSS');
         clearGlobalCSS();
     }
 }
@@ -3780,7 +3786,7 @@ function updateMainStyle() {
 function listenForCharacterEditing() {
     // Force recreation and update of character style options on character edit
     eventSource.on(event_types.EDIT_CHARACTER, () => {
-        console.log('[CSC] Character edit detected');
+        debug('[CSC] Character edit detected');
 
         // Remove existing card option to ensure fresh creation
         const existingOption = document.getElementById('cs-card-option');
@@ -3796,7 +3802,7 @@ function listenForCharacterEditing() {
 
     // Listen for character selection events
     eventSource.on(event_types.CHARACTER_SELECTED, () => {
-        console.log('[CSC] Character selected, updating style options');
+        debug('[CSC] Character selected, updating style options');
 
         // Remove existing card option to ensure fresh creation
         const existingOption = document.getElementById('cs-card-option');
@@ -3823,7 +3829,7 @@ function listenForCharacterEditing() {
         // Check if clicking a character in the character management
         const characterOption = e.target.closest('.character_select');
         if (characterOption) {
-            console.log('[CSC] Character clicked in management panel');
+            debug('[CSC] Character clicked in management panel');
 
             // Remove existing card option to ensure fresh creation
             const existingOption = document.getElementById('cs-card-option');
@@ -3841,7 +3847,7 @@ function listenForCharacterEditing() {
 
 // Initialize the extension
 function initExtension() {
-    console.log(`Initializing ${EXTENSION_NAME} v${EXTENSION_VERSION}...`);
+    debug(`Initializing ${EXTENSION_NAME} v${EXTENSION_VERSION}...`);
 
     // Setup persona change tracking
     setupPersonaChangeTracking();
@@ -3882,7 +3888,7 @@ function initExtension() {
     // Initialize full screen editor
     initFullScreenEditor();
 
-    console.log(`${EXTENSION_NAME} v${EXTENSION_VERSION} initialized`);
+    debug(`${EXTENSION_NAME} v${EXTENSION_VERSION} initialized`);
 }
 
 // jQuery initialization
